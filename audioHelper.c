@@ -6,9 +6,11 @@
  */
 
 #include "audioHelper.h"
+#include "engineSound.h"
 
 /*!\brief pointeur vers la musique chargée par SDL_Mixer */
 static Mix_Music * _mmusic = NULL;
+static EngineSound _engineSound;
 
 /*!\brief pointeur vers le flux audio.
  * \see ahGetAudioStream
@@ -49,6 +51,14 @@ void ahSetAudioStream(Uint8 * audioStream, int audioStreamLength) {
  * \param len longueur de \a stream.
  */
 static void mixCallback(void *udata, Uint8 *stream, int len) {
+  static double t0 = 0;
+  double t = gl4dGetElapsedTime() / 1000.0;
+  double dt = t - t0;
+  t0 = t;
+
+  engine_sound_update(&_engineSound, (float)t, (float)dt);
+  engine_sound_mix(&_engineSound, stream, len);
+
   ahSetAudioStream(stream, len);
   gl4dhUpdateWithAudio();
   ahSetAudioStream(NULL, 0);
@@ -71,6 +81,9 @@ void ahInitAudio(const char * file) {
     fprintf(stderr, "Erreur lors du Mix_LoadMUS: %s\n", Mix_GetError());
     exit(-5);
   }
+  
+  engine_sound_init(&_engineSound);
+
   Mix_SetPostMix(mixCallback, NULL);
   if(!Mix_PlayingMusic())
     Mix_PlayMusic(_mmusic, -1);

@@ -29,8 +29,8 @@ static GLfloat _dim[] = {1920, 1080};
 int main(int argc, char ** argv) {
   if(!gl4duwCreateWindow(argc, argv, "L'Eveil de l'Anomalie - 64K", 
 			 GL4DW_POS_UNDEFINED, GL4DW_POS_UNDEFINED, 
-			 0, 0, 
-             GL4DW_FULLSCREEN | GL4DW_SHOWN))
+       _dim[0] / 2, _dim[1] / 2, 
+             GL4DW_SHOWN))
     return 1;
     
   init();
@@ -46,9 +46,12 @@ int main(int argc, char ** argv) {
 }
 
 static void init(void) {
+  int w, h;
   glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
-  gl4dhInit(_animations, _dim[0], _dim[1], animationsInit);
-  resize(_dim[0], _dim[1]);
+  gl4duwGetWindowSize(&w, &h);
+  /* On initialise gl4dh avec la taille réelle de la fenêtre pour éviter le noir */
+  gl4dhInit(_animations, w, h, animationsInit);
+  resize(w, h);
 }
 
 static void resize(int w, int h) {
